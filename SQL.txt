@@ -1,0 +1,159 @@
+CREATE TABLE funcionarios 
+( 
+ cpf INT PRIMARY KEY,  
+ nome INT,  
+ sexo INT,  
+ dt_nasc INT,  
+ uf INT,  
+ cidade INT,  
+ local INT,  
+ bairro INT,  
+ telefone INT,  
+); 
+
+CREATE TABLE situacoes 
+( 
+ nome_situacao INT,  
+ cod_situacao INT PRIMARY KEY,  
+); 
+
+CREATE TABLE dependentes 
+( 
+ cpf INT PRIMARY KEY,  
+ nome INT,  
+); 
+
+CREATE TABLE funcoes 
+( 
+ cod_funcao INT PRIMARY KEY,  
+ nome_funcao INT,  
+); 
+
+CREATE TABLE buffet 
+( 
+ id_buffet INT PRIMARY KEY AUTO_INCREMENT,  
+ dt_ini INT,  
+ dt_fim INT,  
+); 
+
+CREATE TABLE pratos 
+( 
+ cod_prato INT PRIMARY KEY,  
+ nome_prato INT,  
+ acompanhamento INT,  
+); 
+
+CREATE TABLE ingredientes 
+( 
+ cod_ingrediente INT PRIMARY KEY,  
+ nome_ingrediente INT,  
+ unidade INT,  
+); 
+
+CREATE TABLE estoque 
+( 
+ qtd_ingrediente INT,  
+ cod_ingrediente INT PRIMARY KEY,  
+); 
+
+CREATE TABLE fornecedores 
+( 
+ cod_fornecedor INT PRIMARY KEY,  
+ nome_fornecedor INT,  
+); 
+
+CREATE TABLE bebidas 
+( 
+ cod_bebida INT PRIMARY KEY,  
+ nome_bebida INT,  
+); 
+
+CREATE TABLE funcionarios_situacoes 
+( 
+ dt_ini INT,  
+ dt_fim INT,  
+ cod_situacao INT PRIMARY KEY,  
+ cpf INT PRIMARY KEY,  
+); 
+
+CREATE TABLE funcionarios_dependentes 
+( 
+ dt_ini INT,  
+ dt_fim INT,  
+ cpf INT PRIMARY KEY,  
+ cpf INT PRIMARY KEY,  
+); 
+
+CREATE TABLE funcionarios_funcoes 
+( 
+ dt_ini INT,  
+ dt_fim INT,  
+ cod_funcao INT PRIMARY KEY,  
+ cpf INT PRIMARY KEY,  
+); 
+
+CREATE TABLE funcionarios_buffet 
+( 
+ cpf INT PRIMARY KEY,  
+ id_buffet INT PRIMARY KEY,  
+); 
+
+CREATE TABLE buffet_pratos 
+( 
+ cod_prato INT PRIMARY KEY,  
+ id_buffet INT PRIMARY KEY,  
+); 
+
+CREATE TABLE pratos_ingredientes 
+( 
+ cod_prato INT PRIMARY KEY,  
+ cod_ingrediente INT,  
+); 
+
+CREATE TABLE ingredientes_fornecedores 
+( 
+ cod_ingrediente INT PRIMARY KEY,  
+ cod_fornecedor INT PRIMARY KEY,  
+); 
+
+CREATE TABLE buffet_bebidas 
+( 
+ cod_bebida INT PRIMARY KEY,  
+ id_buffet INT PRIMARY KEY,  
+); 
+
+CREATE TABLE bebidas_fornecedores 
+( 
+ cod_bebida INT PRIMARY KEY,  
+ cod_fornecedor INT PRIMARY KEY,  
+); 
+
+CREATE TABLE ingredientes_compra 
+( 
+ cod_fornecedor INT PRIMARY KEY,  
+ cod_ingrediente INT PRIMARY KEY,  
+ qtd_compra INT,  
+ valor_compra INT,  
+); 
+
+ALTER TABLE estoque ADD FOREIGN KEY(cod_ingrediente) REFERENCES ingredientes_compra (cod_ingrediente)
+ALTER TABLE funcionarios_situacoes ADD FOREIGN KEY(cod_situacao) REFERENCES situacoes (cod_situacao)
+ALTER TABLE funcionarios_situacoes ADD FOREIGN KEY(cpf) REFERENCES funcionarios (cpf)
+ALTER TABLE funcionarios_dependentes ADD FOREIGN KEY(cpf) REFERENCES dependentes (cpf)
+ALTER TABLE funcionarios_dependentes ADD FOREIGN KEY(cpf) REFERENCES funcionarios (cpf)
+ALTER TABLE funcionarios_funcoes ADD FOREIGN KEY(cod_funcao) REFERENCES funcoes (cod_funcao)
+ALTER TABLE funcionarios_funcoes ADD FOREIGN KEY(cpf) REFERENCES funcionarios (cpf)
+ALTER TABLE funcionarios_buffet ADD FOREIGN KEY(cpf) REFERENCES funcionarios (cpf)
+ALTER TABLE funcionarios_buffet ADD FOREIGN KEY(id_buffet) REFERENCES buffet (id_buffet)
+ALTER TABLE buffet_pratos ADD FOREIGN KEY(cod_prato) REFERENCES pratos (cod_prato)
+ALTER TABLE buffet_pratos ADD FOREIGN KEY(id_buffet) REFERENCES buffet (id_buffet)
+ALTER TABLE pratos_ingredientes ADD FOREIGN KEY(cod_prato) REFERENCES pratos (cod_prato)
+ALTER TABLE pratos_ingredientes ADD FOREIGN KEY(cod_ingrediente) REFERENCES ingredientes (cod_ingrediente)
+ALTER TABLE ingredientes_fornecedores ADD FOREIGN KEY(cod_ingrediente) REFERENCES ingredientes (cod_ingrediente)
+ALTER TABLE ingredientes_fornecedores ADD FOREIGN KEY(cod_fornecedor) REFERENCES fornecedores (cod_fornecedor)
+ALTER TABLE buffet_bebidas ADD FOREIGN KEY(cod_bebida) REFERENCES bebidas (cod_bebida)
+ALTER TABLE buffet_bebidas ADD FOREIGN KEY(id_buffet) REFERENCES buffet (id_buffet)
+ALTER TABLE bebidas_fornecedores ADD FOREIGN KEY(cod_bebida) REFERENCES bebidas (cod_bebida)
+ALTER TABLE bebidas_fornecedores ADD FOREIGN KEY(cod_fornecedor) REFERENCES fornecedores (cod_fornecedor)
+ALTER TABLE ingredientes_compra ADD FOREIGN KEY(cod_fornecedor) REFERENCES fornecedores (cod_fornecedor)
+ALTER TABLE ingredientes_compra ADD FOREIGN KEY(cod_ingrediente) REFERENCES ingredientes (cod_ingrediente)
