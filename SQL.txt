@@ -2,7 +2,7 @@ USE defaultdb;
 
 CREATE TABLE funcionarios 
 ( 
- cpf INT PRIMARY KEY,  
+ cpf BIGINT PRIMARY KEY,  
  nome VARCHAR(255),  
  sexo VARCHAR(255),  
  dt_nasc DATE,  
@@ -21,7 +21,7 @@ CREATE TABLE situacoes
 
 CREATE TABLE funcionarios_situacoes 
 ( 
- cpf INT, 
+ cpf BIGINT, 
  cod_situacao INT,
  dt_ini DATE,  
  dt_fim DATE,
@@ -38,7 +38,7 @@ CREATE TABLE funcoes
 
 CREATE TABLE funcionarios_funcoes 
 (  
- cpf INT,
+ cpf BIGINT,
  cod_funcao INT, 
  dt_ini DATE,  
  dt_fim DATE,
@@ -49,15 +49,15 @@ ALTER TABLE funcionarios_funcoes ADD FOREIGN KEY(cod_funcao) REFERENCES funcoes 
 
 CREATE TABLE dependentes 
 ( 
- cpf INT PRIMARY KEY,  
+ cpf BIGINT PRIMARY KEY,  
  nome VARCHAR(255),  
  telefone VARCHAR(255)  
 );
 
 CREATE TABLE funcionarios_dependentes 
 ( 
- cpf_fun INT,  
- cpf_dep INT,
+ cpf_fun BIGINT,  
+ cpf_dep BIGINT,
  dt_ini DATE,  
  dt_fim DATE,
 PRIMARY KEY (cpf_fun, cpf_dep)
@@ -75,7 +75,7 @@ CREATE TABLE buffet
 
 CREATE TABLE funcionarios_buffet 
 ( 
- cpf INT,  
+ cpf BIGINT,  
  id_buffet INT, 
  PRIMARY KEY (id_buffet, cpf) 
 ); 
