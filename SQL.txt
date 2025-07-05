@@ -86,7 +86,8 @@ CREATE TABLE pratos
 ( 
  cod_prato INT PRIMARY KEY,  
  nome_prato VARCHAR(255),  
- acompanhamento VARCHAR(255)  
+ acompanhamento VARCHAR(255),
+ foto BLOB
 );
 
 CREATE TABLE buffet_pratos 
