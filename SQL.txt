@@ -62,8 +62,8 @@ CREATE TABLE funcionarios_dependentes
  dt_fim DATE,
 PRIMARY KEY (cpf_fun, cpf_dep)
 );
-ALTER TABLE funcionarios_dependentes ADD FOREIGN KEY(cpf_fun) REFERENCES dependentes (cpf);
-ALTER TABLE funcionarios_dependentes ADD FOREIGN KEY(cpf_dep) REFERENCES funcionarios (cpf);
+ALTER TABLE funcionarios_dependentes ADD FOREIGN KEY(cpf_fun) REFERENCES funcionarios (cpf);
+ALTER TABLE funcionarios_dependentes ADD FOREIGN KEY(cpf_dep) REFERENCES dependentes (cpf);
 
 CREATE TABLE buffet 
 ( 
