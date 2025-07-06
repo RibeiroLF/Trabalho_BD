@@ -179,7 +179,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `ingredientes_compra` WRITE;
 /*!40000 ALTER TABLE `ingredientes_compra` DISABLE KEYS */;
-INSERT INTO `ingredientes_compra` VALUES (1,'2025-01-01',10,100,1,1),(2,'2025-01-01',20,200,2,2),(3,'2025-01-01',30,300,3,3),(4,'2025-01-01',40,400,4,4),(5,'2025-01-01',50,500,5,5);
+INSERT INTO `ingredientes_compra` VALUES (1,'2025-01-01',10,100,1,1),(1,'2025-01-01',15,150,2,1),(2,'2025-01-01',20,200,2,2),(3,'2025-01-01',30,300,3,3),(4,'2025-01-01',40,400,4,4),(5,'2025-01-01',50,500,5,5);
 /*!40000 ALTER TABLE `ingredientes_compra` ENABLE KEYS */;
 UNLOCK TABLES;
 
