@@ -166,12 +166,13 @@ ALTER TABLE bebidas_fornecedores ADD FOREIGN KEY(cod_fornecedor) REFERENCES forn
 
 CREATE TABLE ingredientes_compra 
 ( 
- id_compra INT PRIMARY KEY,
+ id_compra INT,
  dt_compra DATE,  
  qt_compra INT,  
  vl_compra DECIMAL,
  cod_ingrediente INT,
- cod_fornecedor INT    
+ cod_fornecedor INT,
+ PRIMARY KEY (id_compra, cod_ingrediente)   
 ); 
 ALTER TABLE ingredientes_compra ADD FOREIGN KEY(cod_ingrediente) REFERENCES ingredientes (cod_ingrediente);
 ALTER TABLE ingredientes_compra ADD FOREIGN KEY(cod_fornecedor) REFERENCES fornecedores (cod_fornecedor);
