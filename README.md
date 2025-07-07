@@ -2,7 +2,7 @@
 ## Sistema de controle do RU
 
 ### Introdução
-Este sistema tem como objetivo estruturar e fornecer informações sobre o menu semanal, incluindo diversas refeições (café da manhã, almoço e jantar), alternativas de bebidas, sobremesas e outros complementos.
+O sistema de controle do Restaurante Universtário (RU) tem o objetivo de armazenar e fornecer informações sobre o menu semanal, incluindo suas refeições (café da manhã, almoço e jantar), pratos, bebidas e complementos. Ele também armazena dados dos funcionários do restaurante, compras e estoque.
 
 ### Links
 #### Modelo Conceitual
