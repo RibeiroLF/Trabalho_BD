@@ -176,3 +176,34 @@ CREATE TABLE ingredientes_compra
 ); 
 ALTER TABLE ingredientes_compra ADD FOREIGN KEY(cod_ingrediente) REFERENCES ingredientes (cod_ingrediente);
 ALTER TABLE ingredientes_compra ADD FOREIGN KEY(cod_fornecedor) REFERENCES fornecedores (cod_fornecedor);
+
+-- VIEW
+CREATE OR REPLACE VIEW buffets AS  
+SELECT B.id_buffet, B.dt_ini, F.nome AS responsavel, B.refeicao, P.nome_prato, P.acompanhamento, BE.nome_bebida  
+FROM buffet B  
+LEFT JOIN funcionarios_buffet FB ON (B.id_buffet = FB.id_buffet)  
+LEFT JOIN funcionarios F ON (FB.cpf = F.cpf)  
+LEFT JOIN buffet_pratos BP ON (B.id_buffet = BP.id_buffet)  
+LEFT JOIN pratos P ON (BP.cod_prato = P.cod_prato)  
+LEFT JOIN buffet_bebidas BB ON (B.id_buffet = BB.id_buffet)  
+LEFT JOIN bebidas BE ON (BB.cod_bebida = BE.cod_bebida)  
+WHERE B.dt_fim IS NULL; 
+
+-- PROCEDURE
+DROP procedure IF EXISTS atualizarEstoquePorCompra; 
+DELIMITER $$  
+$$ CREATE PROCEDURE atualizarEstoquePorCompra (IN p_cod_ingrediente INT, IN p_qt_compra INT)  
+BEGIN  
+-- Verifica se o ingrediente já existe no estoque  
+IF EXISTS (SELECT 1 FROM estoque_ingredientes WHERE cod_ingrediente = p_cod_ingrediente) THEN  
+-- Se existe, atualiza a quantidade somando a nova compra  
+UPDATE estoque_ingredientes  
+SET qtd_ingrediente = qtd_ingrediente + p_qt_compra  
+WHERE cod_ingrediente = p_cod_ingrediente;  
+ELSE  
+-- Se não existe, insere um novo registro no estoque  
+INSERT INTO estoque_ingredientes (cod_ingrediente, qtd_ingrediente)  
+VALUES (p_cod_ingrediente, p_qt_compra);  
+END IF;  
+END$$ 
+DELIMITER ; 
