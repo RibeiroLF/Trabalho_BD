@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle do RU</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // --- Ícones ---
+        const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>;
+        const UtensilsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3z"/></svg>;
+        const DrinksIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 2l2.21 20.47c.14 1.23 1.2 2.03 2.38 2.03h7.82c1.18 0 2.24-.8 2.38-2.03L21 2zm10.22 15H10.5l-1.1-10h4.2z"/></svg>;
+        const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 18H3c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h10v12H5Z"/><path d="M14 9h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1v-6Z"/><path d="M16 18h2"/><path d="M7 18h6"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>;
+        const LeafIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/><path d="M12 2a7 7 0 0 1 7 7h2a10 10 0 0 0-10-10z"/></svg>;
+        const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>;
+        const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>;
+        const PlusCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>;
+
+        const formatDateToBR = (dateString) => {
+            if (!dateString || typeof dateString !== 'string') return '';
+            const datePart = dateString.split(' ')[0];
+            const [year, month, day] = datePart.split('-');
+            if (!year || !month || !day) return dateString; 
+            return `${day}/${month}/${year}`;
+        };
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('funcionarios');
+            const [data, setData] = useState({ funcionarios: [], pratos: [], bebidas: [], fornecedores: [], ingredientes: [] });
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+            const [editingItem, setEditingItem] = useState(null);
+
+            const API_BASE_URL = 'http://127.0.0.1:5000';
+            const API_URLS = {
+                funcionarios: `${API_BASE_URL}/funcionarios`,
+                pratos: `${API_BASE_URL}/pratos`,
+                bebidas: `${API_BASE_URL}/bebidas`,
+                fornecedores: `${API_BASE_URL}/fornecedores`,
+                ingredientes: `${API_BASE_URL}/ingredientes`,
+            };
+
+            const fetchData = useCallback(async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                    const responses = await Promise.all(Object.values(API_URLS).map(url => fetch(url)));
+                    
+                    for (const res of responses) {
+                        if (!res.ok) throw new Error(`Falha na requisição: ${res.statusText}`);
+                    }
+
+                    const [funcionarios, pratos, bebidas, fornecedores, ingredientes] = await Promise.all(responses.map(res => res.json()));
+
+                    setData({ funcionarios, pratos, bebidas, fornecedores, ingredientes });
+                } catch (err) {
+                    setError('Não foi possível conectar ao servidor. Verifique a conexão com o banco de dados e o firewall.');
+                    console.error(err);
+                } finally {
+                    setLoading(false);
+                }
+            }, []);
+
+            useEffect(() => { fetchData(); }, [fetchData]);
+
+            const handleApiAction = async (action, type, id, body) => {
+                const url = id ? `${API_URLS[type]}/${id}` : API_URLS[type];
+                const options = {
+                    method: action,
+                    headers: { 'Content-Type': 'application/json' },
+                    ...(body && { body: JSON.stringify(body) }),
+                };
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) throw new Error('A requisição falhou.');
+                    await fetchData();
+                    setEditingItem(null);
+                } catch (err) {
+                    setError(`Falha ao ${action} o item. Tente novamente.`);
+                    console.error(err);
+                }
+            };
+            
+            const tabs = {
+                funcionarios: { label: 'Funcionários', icon: <UserIcon />, color: 'blue' },
+                pratos: { label: 'Pratos', icon: <UtensilsIcon />, color: 'amber' },
+                bebidas: { label: 'Bebidas', icon: <DrinksIcon />, color: 'sky' },
+                fornecedores: { label: 'Fornecedores', icon: <TruckIcon />, color: 'emerald' },
+                ingredientes: { label: 'Ingredientes', icon: <LeafIcon />, color: 'lime' },
+            };
+
+            const renderContent = () => {
+                const fields = {
+                    funcionarios: { cpf: 'CPF', nome: 'Nome', cidade: 'Cidade', telefone: 'Telefone' },
+                    pratos: { cod_prato: 'Código', nome_prato: 'Nome do Prato', acompanhamento: 'Acompanhamento' },
+                    bebidas: { cod_bebida: 'Código', nome_bebida: 'Nome da Bebida' },
+                    fornecedores: { cod_fornecedor: 'Código', nome_fornecedor: 'Nome', telefone: 'Telefone', dt_ini: 'Data Início' },
+                    ingredientes: { cod_ingrediente: 'Código', nome_ingrediente: 'Nome', unidade: 'Unidade', quantidade: 'Estoque' }
+                };
+                const idFields = {
+                    funcionarios: 'cpf', pratos: 'cod_prato', bebidas: 'cod_bebida', fornecedores: 'cod_fornecedor', ingredientes: 'cod_ingrediente'
+                };
+
+                return <CrudSection type={activeTab} items={data[activeTab]} fields={fields[activeTab]} idField={idFields[activeTab]} onApiAction={handleApiAction} editingItem={editingItem} setEditingItem={setEditingItem} />;
+            };
+
+            return (
+                <div className="bg-slate-100 min-h-screen font-sans">
+                    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+                        <header className="mb-8">
+                            <h1 className="text-4xl font-bold text-slate-800">Sistema de Controle do RU</h1>
+                            <p className="text-slate-500 mt-1">Gerenciando os dados do RU de forma centralizada.</p>
+                        </header>
+
+                        {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert"><p className="font-bold">Erro de Conexão</p><p>{error}</p></div>}
+
+                        <div className="flex border-b border-slate-300 flex-wrap">
+                            {Object.entries(tabs).map(([key, { label, icon, color }]) => (
+                                <button key={key} onClick={() => { setActiveTab(key); setEditingItem(null); }} className={`flex items-center gap-2 px-4 py-3 text-sm sm:text-base font-medium transition-colors duration-200 -mb-px flex-shrink-0 ${activeTab === key ? `border-b-2 border-${color}-500 text-${color}-600` : 'text-slate-500 hover:text-slate-800'}`}>
+                                    {icon}<span>{label}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <main className="mt-6">{loading ? <p className="text-center text-slate-500">Carregando dados...</p> : renderContent()}</main>
+                    </div>
+                </div>
+            );
+        }
+
+        function CrudSection({ type, items, fields, idField, onApiAction, editingItem, setEditingItem }) {
+            const isEditingCurrentType = editingItem && editingItem.type === type;
+            const handleEdit = (item) => setEditingItem({ type, data: item });
+            const handleCancel = () => setEditingItem(null);
+            const handleDelete = (id) => { if (window.confirm('Tem certeza que deseja deletar este item?')) { onApiAction('DELETE', type, id); } };
+
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-1"><FormSection key={isEditingCurrentType ? editingItem.data[idField] : 'new'} type={type} fields={fields} idField={idField} onApiAction={onApiAction} editingItem={isEditingCurrentType ? editingItem.data : null} onCancel={handleCancel} /></div>
+                    <div className="lg:col-span-2"><TableSection items={items} fields={fields} idField={idField} onEdit={handleEdit} onDelete={handleDelete} /></div>
+                </div>
+            );
+        }
+
+        function FormSection({ type, fields, idField, onApiAction, editingItem, onCancel }) {
+            const [formData, setFormData] = useState({});
+
+            useEffect(() => {
+                const initialData = {};
+                if (editingItem) {
+                    Object.keys(fields).forEach(key => { initialData[key] = editingItem[key] || ''; });
+                } else {
+                    Object.keys(fields).forEach(key => { initialData[key] = ''; });
+                }
+                setFormData(initialData);
+            }, [editingItem, fields]);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const body = { ...formData };
+                
+                if (type === 'funcionarios' && !editingItem) {
+                    body.sexo = 'N/A'; body.dt_nasc = '2000-01-01'; body.uf = 'DF'; body.localidade = 'N/A'; body.bairro = 'N/A';
+                }
+
+                if (editingItem) {
+                    onApiAction('PUT', type, editingItem[idField], body);
+                } else {
+                    if (['pratos', 'bebidas', 'fornecedores', 'ingredientes'].includes(type)) {
+                        delete body[idField];
+                    }
+                    onApiAction('POST', type, null, body);
+                }
+            };
+
+            return (
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h2 className="text-xl font-bold text-slate-700 mb-4 flex items-center gap-2"><PlusCircleIcon />{editingItem ? 'Editar Item' : 'Adicionar Novo Item'}</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {Object.entries(fields).map(([key, label]) => {
+                            if (!editingItem && ['pratos', 'bebidas', 'fornecedores', 'ingredientes'].includes(type) && key === idField) {
+                                return null;
+                            }
+                            const isDateField = key.startsWith('dt_');
+                            const value = formData[key] || '';
+                            const displayValue = isDateField && value ? value.split(' ')[0] : value;
+
+                            return (
+                                <div key={key}>
+                                    <label htmlFor={key} className="block text-sm font-medium text-slate-600 mb-1">{label}</label>
+                                    <input
+                                        type={isDateField ? 'date' : (key.includes('cpf') || key.includes('cod') || key === 'quantidade' ? 'number' : 'text')}
+                                        id={key}
+                                        name={key}
+                                        value={displayValue}
+                                        onChange={handleChange}
+                                        readOnly={editingItem && key === idField}
+                                        className={`w-full p-2 border rounded-md transition-colors ${editingItem && key === idField ? 'bg-slate-100' : 'bg-white'}`}
+                                        required
+                                    />
+                                </div>
+                            );
+                        })}
+                        <div className="flex gap-2 pt-2">
+                            <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-transform transform hover:scale-105">{editingItem ? 'Salvar Alterações' : 'Adicionar'}</button>
+                            {editingItem && <button type="button" onClick={onCancel} className="w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-md transition-transform transform hover:scale-105">Cancelar</button>}
+                        </div>
+                    </form>
+                </div>
+            );
+        }
+
+        function TableSection({ items, fields, idField, onEdit, onDelete }) {
+            return (
+                <div className="bg-white p-6 rounded-lg shadow-sm overflow-x-auto">
+                    <h2 className="text-xl font-bold text-slate-700 mb-4">Itens Cadastrados</h2>
+                    {items.length === 0 ? <p className="text-slate-500 text-center py-8">Nenhum item encontrado.</p> : (
+                        <table className="w-full text-sm text-left text-slate-500">
+                            <thead className="text-xs text-slate-700 uppercase bg-slate-50">
+                                <tr>
+                                    {Object.values(fields).map(label => <th key={label} className="px-6 py-3">{label}</th>)}
+                                    <th className="px-6 py-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.map(item => (
+                                    <tr key={item[idField]} className="bg-white border-b hover:bg-slate-50">
+                                        {Object.keys(fields).map(key => {
+                                            const value = item[key];
+                                            const isDate = typeof value === 'string' && key.startsWith('dt_');
+                                            const displayValue = isDate ? formatDateToBR(value) : value;
+                                            return <td key={key} className="px-6 py-4">{displayValue}</td>
+                                        })}
+                                        <td className="px-6 py-4 text-right space-x-2">
+                                            <button onClick={() => onEdit(item)} className="p-1 text-blue-600 hover:text-blue-800 transition-colors"><EditIcon /></button>
+                                            <button onClick={() => onDelete(item[idField])} className="p-1 text-red-600 hover:text-red-800 transition-colors"><TrashIcon /></button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
